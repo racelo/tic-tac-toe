@@ -1,4 +1,3 @@
-
 function Gameboard() {
     const rows = 3;
     const columns = 3;
@@ -18,14 +17,18 @@ function Gameboard() {
     // Create a method that will drop a token to the user's desired position in the gameboard
     // Parameters: (1) token, (2) row num, (3) column num
     
-    const dropToken = function (token, row, column) {
-        // check if the selected cell in the gameboard is empty
-        if(board[row][column] === 0) {
-            board[row][column] = token;
+    const dropToken = function (player, row, column) {
+        // Player parameter is an object. It has two properties: name and token
+
+        // Check if selected cell is empty
+        if (board[row][column] === 0) {
+            board[row][column] = player.token;
+            console.log(`Dropping ${player.name}'s token at row# ${row} column# ${column}.`);
         } else {
-            // return an error if the selected cell is already taken
-            console.log("Error: Cell is already taken");
+            // Return an error if the selected cell is already taken
+            console.log("Error: Cell is already taken. Please drop a new token at a different position.");
         }
+        printBoard();
     }
 
     const printBoard = () => {
@@ -35,9 +38,29 @@ function Gameboard() {
     return { dropToken, getBoard, printBoard };
 }
 
+function GameController() {
+    const board = Gameboard();
 
-const newGB = Gameboard();
-// newGB.dropToken("X", 1, 0);
-// newGB.printBoard();
-// console.log(newGB.dropToken("X", 1, 0));
-// newGB.printBoard();
+    const players = [
+        { name: "playerOne",
+          token: "X",
+        },
+        { name: "playerTwo",
+          token: "O",
+        }
+    ];
+
+    let activePlayer = players[0]; 
+
+    const playRound = (rowNum, colNum) => {
+        board.dropToken(activePlayer, rowNum, colNum);
+    }
+
+    return { playRound };
+}
+
+const game = GameController();
+
+// game.playRound(0, 1);
+// game.playRound(1, 2);
+// game.playRound(1, 2)
