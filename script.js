@@ -18,17 +18,7 @@ function Gameboard() {
     // Parameters: (1) token, (2) row num, (3) column num
     
     const dropToken = function (player, row, column) {
-        // Player parameter is an object. It has two properties: name and token
-
-        // Check if selected cell is empty
-        if (board[row][column] === 0) {
-            board[row][column] = player.token;
-            console.log(`Dropping ${player.name}'s token at row# ${row} column# ${column}.`);
-        } else {
-            // Return an error if the selected cell is already taken
-            console.log("Error: Cell is already taken. Please drop a new token at a different position.");
-        }
-        printBoard();
+        board[row][column] = player.token;
     }
 
     const printBoard = () => {
@@ -50,17 +40,50 @@ function GameController() {
         }
     ];
 
-    let activePlayer = players[0]; 
+    let activePlayer = players[0];
+
+    // Create a random input for a bot player
+    // const getComputerChoice = () => {
+        // const randomNum = Math.floor(Math.random * 3);
+        // Create a filter of all the empty cells in the row. Separate the empty rows and columns
+        // let row = board.getBoard().filter()
+        // let column = randomNum();
+
+        // return [row, column];
+    // }
+
+    const getActivePlayer = () => activePlayer;
 
     const playRound = (rowNum, colNum) => {
-        board.dropToken(activePlayer, rowNum, colNum);
+        // Check if selected cell is empty
+        if (board.getBoard()[rowNum][colNum] === 0) {
+            board.dropToken(activePlayer, rowNum, colNum);
+            console.log(`Dropping ${activePlayer.name}'s token at row# ${rowNum} column# ${colNum}.`);
+            switchPlayer();
+            printNewRound();
+        } else {
+        // Return an error if the selected cell is already taken
+            console.log("Error: Cell is already taken. Please drop a new token at a different position.");
+            board.printBoard();
+        };
     }
 
-    return { playRound };
+    const switchPlayer = () => {
+        activePlayer === players[0] ? activePlayer = players[1] : activePlayer = players[0];
+    }
+
+    const printNewRound = () => {
+        board.printBoard();
+        console.log(`It's ${activePlayer.name}'s turn.`);
+    }
+
+    return { playRound, getActivePlayer };
 }
 
 const game = GameController();
 
-// game.playRound(0, 1);
-// game.playRound(1, 2);
-// game.playRound(1, 2)
+console.log(game.getActivePlayer());
+game.playRound(1, 1);
+game.playRound(2, 0);
+game.playRound(2, 0);
+game.playRound(2, 1);
