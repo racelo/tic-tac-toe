@@ -42,6 +42,8 @@ function GameController() {
 
     let activePlayer = players[0];
 
+    const printTempBoard = () => board.getBoard();
+
     // Create a random input for a bot player
     // const getComputerChoice = () => {
         // const randomNum = Math.floor(Math.random * 3);
@@ -77,13 +79,57 @@ function GameController() {
         console.log(`It's ${activePlayer.name}'s turn.`);
     }
 
-    return { playRound, getActivePlayer };
+    return { playRound, getActivePlayer, printTempBoard};
 }
 
 const game = GameController();
 
 console.log(game.getActivePlayer());
-game.playRound(1, 1);
-game.playRound(2, 0);
-game.playRound(2, 0);
-game.playRound(2, 1);
+// game.playRound(0, 0);
+// game.playRound(1, 0)
+// game.playRound(1, 1)
+// game.playRound(2, 0)
+// game.playRound(0, 2);
+// game.playRound(2, 1);
+// game.playRound(2, 2);
+
+// console.log(game.printTempBoard());
+function checkWin(arr, token) {
+    const winningPatterns = [
+        // horizontal
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        // vertical
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        // diagonal
+        [0, 4, 8],
+        [2, 4, 6]
+    ]
+
+    // const checkCell = cell => cell === token; 
+    let newArr = arr.flat();
+
+    // return winningCondition = winningPatterns.some(setPattern=>
+    //     setPattern.every(index => newArr[index] === token));
+
+    // let winningPattern;
+    // let winningCondition = winningPatterns.some(setArr => {
+    //     if(setArr.every(index => newArr[index] === token)){
+    //         winPattern = setArr;
+    //         return true; 
+    //     }
+    // })
+    //    console.log(winPattern);
+
+    // let mappedBoard = winningPatterns.map(pattern => pattern.map(index => newArr[index]));
+    // console.log(mappedBoard);
+        
+//    console.log(winningCondition);
+}
+
+checkWin(game.printTempBoard(), "X");
+
+
