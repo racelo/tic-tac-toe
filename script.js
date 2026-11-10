@@ -7,7 +7,7 @@ function Gameboard() {
     for(let i = 0; i < rows; i++) {
         board[i] = [];
         for(let j = 0; j < columns; j++) {
-            board[i].push(0);
+            board[i].push(Cell());
         }  
     }
 
@@ -18,18 +18,46 @@ function Gameboard() {
     // Parameters: (1) token, (2) row num, (3) column num
     
     const dropToken = function (player, row, column) {
-        board[row][column] = player.token;
+        board[row][column].addToken(player);
     }
 
     const printBoard = () => {
-        console.log(getBoard());
+        const boardCellValues = board.map(row => 
+            row.map(cell => cell.getValue())
+        );
+        console.log(boardCellValues);
     }
 
     return { dropToken, getBoard, printBoard };
 }
 
+function Cell() {
+    let value = 0;
+
+    const addToken = (player) => {
+        value = player;
+    };
+
+    const getValue = () => value;
+
+    return {
+        addToken,
+        getValue
+    }
+}
+
 function GameController() {
     const board = Gameboard();
+
+    let gameWon = false;
+
+    let isGameOver = () => gameWon;
+
+    const mappedBoard = () => {
+        let boardVal = board.getBoard().map(row => 
+        row.map(cell => cell.getValue()));
+        return boardVal;
+    }
 
     const players = [
         { name: "playerOne",
@@ -42,27 +70,22 @@ function GameController() {
 
     let activePlayer = players[0];
 
-    const printTempBoard = () => board.getBoard();
-
-    // Create a random input for a bot player
-    // const getComputerChoice = () => {
-        // const randomNum = Math.floor(Math.random * 3);
-        // Create a filter of all the empty cells in the row. Separate the empty rows and columns
-        // let row = board.getBoard().filter()
-        // let column = randomNum();
-
-        // return [row, column];
-    // }
-
     const getActivePlayer = () => activePlayer;
 
     const playRound = (rowNum, colNum) => {
         // Check if selected cell is empty
-        if (board.getBoard()[rowNum][colNum] === 0) {
-            board.dropToken(activePlayer, rowNum, colNum);
-            console.log(`Dropping ${activePlayer.name}'s token at row# ${rowNum} column# ${colNum}.`);
-            switchPlayer();
-            printNewRound();
+        if (board.getBoard()[rowNum][colNum].getValue() === 0) {
+            board.dropToken(getActivePlayer().token, rowNum, colNum);
+            console.log(`Dropping ${getActivePlayer().name}'s token at row# ${rowNum} column# ${colNum}.`);
+
+            if(checkWin(mappedBoard(), getActivePlayer().token)) {
+                gameWon = true;
+                console.log(`Game over. You win ${getActivePlayer().name}`);
+            } else {
+                switchPlayer();
+                printNewRound();
+            }
+
         } else {
         // Return an error if the selected cell is already taken
             console.log("Error: Cell is already taken. Please drop a new token at a different position.");
@@ -79,22 +102,65 @@ function GameController() {
         console.log(`It's ${activePlayer.name}'s turn.`);
     }
 
-    return { playRound, getActivePlayer, printTempBoard};
+    return { 
+        playRound, 
+        getActivePlayer, 
+        getBoard: board.getBoard,
+        isGameOver
+    };
 }
 
-const game = GameController();
+function ScreenController() {
+    const game = GameController();
+    const board = game.getBoard();
 
-console.log(game.getActivePlayer());
-// game.playRound(0, 0);
-// game.playRound(1, 0)
-// game.playRound(1, 1)
-// game.playRound(2, 0)
-// game.playRound(0, 2);
-// game.playRound(2, 1);
-// game.playRound(2, 2);
+    const boardContainer = document.querySelector(".board-container")
+    
+    board.forEach((arr, rowNum) => {
+        const row = document.createElement("div")
+        arr.forEach((cell, colNum) => {
+            const button = document.createElement("button");
+            button.dataset.row = rowNum;
+            button.dataset.col = colNum;
+            button.textContent = cell.getValue();
+            row.append(button);
+        })
+        boardContainer.append(row);
+    })
+    
+    const updateScreen = () => {
+        board.forEach((arr, rowNum) => {
+        const row = document.createElement("div")
+        arr.forEach((cell, colNum) => {
+            const button = document.createElement("button");
+            button.dataset.row = rowNum;
+            button.dataset.col = colNum;
+            button.textContent = cell.getValue();
+            row.append(button);
+        })
+        boardContainer.append(row);
+    })
+    }
 
-// console.log(game.printTempBoard());
+    function clickBoard(e) {
+        if(e.target.dataset) {
+            game.playRound(e.target.dataset.row, e.target.dataset.col);
+            if(game.isGameOver() === true) {
+                document.querySelectorAll("button").forEach(button => button.setAttribute("disabled", "disabled"));
+            } else {
+                boardContainer.textContent = "";
+                updateScreen();
+            }
+
+         }
+    }
+    boardContainer.addEventListener("click", clickBoard)
+}
+ScreenController();
+
+
 function checkWin(arr, token) {
+    // console.log(arr);
     const winningPatterns = [
         // horizontal
         [0, 1, 2],
@@ -109,27 +175,11 @@ function checkWin(arr, token) {
         [2, 4, 6]
     ]
 
-    // const checkCell = cell => cell === token; 
-    let newArr = arr.flat();
+    const flatArr = arr.flat();
 
     return winningCondition = winningPatterns.some(setPattern=>
-        setPattern.every(index => newArr[index] === token));
-
-    // let winningPattern;
-    // let winningCondition = winningPatterns.some(setArr => {
-    //     if(setArr.every(index => newArr[index] === token)){
-    //         winPattern = setArr;
-    //         return true; 
-    //     }
-    // })
-    //    console.log(winPattern);
-
-    // let mappedBoard = winningPatterns.map(pattern => pattern.map(index => newArr[index]));
-    // console.log(mappedBoard);
-        
-//    console.log(winningCondition);
+        setPattern.every(index => flatArr[index] === token));
 }
 
-checkWin(game.printTempBoard(), "X");
 
 
